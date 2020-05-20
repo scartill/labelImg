@@ -225,6 +225,9 @@ class MainWindow(QMainWindow, WindowMixin):
         verify = action(getStr('verifyImg'), self.verifyImg,
                         'space', 'verify', getStr('verifyImgDetail'))
 
+        background = action(getStr('asBackground'), self.asBackgroundImg,
+                        'b', 'background', getStr('asBackgroundDetail'))
+
         save = action(getStr('save'), self.saveFile,
                       'Ctrl+S', 'save', getStr('saveDetail'), enabled=False)
 
@@ -396,7 +399,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, opendir, changeSavedir, openNextImg, openPrevImg, verify, save, save_format, None, create, copy, delete, None,
+            open, opendir, changeSavedir, openNextImg, openPrevImg, verify, background, save, save_format, None, create, copy, delete, None,
             zoomIn, zoom, zoomOut, fitWindow, fitWidth)
 
         self.actions.advanced = (
@@ -418,6 +421,9 @@ class MainWindow(QMainWindow, WindowMixin):
         self.fit_window = False
         # Add Chris
         self.difficult = False
+
+        # BR: add background checkbox
+        self.background = False
 
         ## Fix the compatible issue for qt4 and qt5. Convert the QStringList to python list
         if settings.get(SETTING_RECENT_FILES):
@@ -715,6 +721,9 @@ class MainWindow(QMainWindow, WindowMixin):
         except:
             pass
 
+    def btnbackgnd(self, item= None):
+        self.canvas.background = self.backcButton.isChecked()
+
     # React to canvas signals.
     def shapeSelectionChanged(self, selected=False):
         if self._noSelectionSlot:
@@ -800,6 +809,10 @@ class MainWindow(QMainWindow, WindowMixin):
         if self.labelFile is None:
             self.labelFile = LabelFile()
             self.labelFile.verified = self.canvas.verified
+            
+            # BR: background flag
+            self.labelFile.background = self.canvas.background
+
 
         def format_shape(s):
             return dict(label=s.label,
@@ -1026,12 +1039,16 @@ class MainWindow(QMainWindow, WindowMixin):
                 self.lineColor = QColor(*self.labelFile.lineColor)
                 self.fillColor = QColor(*self.labelFile.fillColor)
                 self.canvas.verified = self.labelFile.verified
+                # BR: background flag
+                self.canvas.background = self.labelFile.background
             else:
                 # Load image:
                 # read data first and store for saving into label file.
                 self.imageData = read(unicodeFilePath, None)
                 self.labelFile = None
                 self.canvas.verified = False
+                # BR: background flag
+                self.canvas.background = False
 
             image = QImage.fromData(self.imageData)
             if image.isNull():
@@ -1251,6 +1268,25 @@ class MainWindow(QMainWindow, WindowMixin):
             self.canvas.verified = self.labelFile.verified
             self.paintCanvas()
             self.saveFile()
+    
+    # BR: background flag
+    def asBackgroundImg(self, _value=False):
+        # Proceding next image
+        if self.filePath is not None:
+            try:
+                self.labelFile.toggleBackground()
+            except AttributeError:
+                # If the labelling file does not exist yet, create if and
+                # re-save it with the background attribute.
+                self.saveFile()
+                if self.labelFile != None:
+                    self.labelFile.toggleBackground()
+                else:
+                    return
+
+            self.canvas.background = self.labelFile.background
+            self.paintCanvas()
+            self.saveFile()
 
     def openPrevImg(self, _value=False):
         # Proceding prev image without dialog if having any label
@@ -1453,6 +1489,7 @@ class MainWindow(QMainWindow, WindowMixin):
         shapes = tVocParseReader.getShapes()
         self.loadLabels(shapes)
         self.canvas.verified = tVocParseReader.verified
+        self.canvas.background = tVocParseReader.background
 
     def loadYOLOTXTByFilename(self, txtPath):
         if self.filePath is None:
@@ -1466,6 +1503,8 @@ class MainWindow(QMainWindow, WindowMixin):
         print (shapes)
         self.loadLabels(shapes)
         self.canvas.verified = tYoloParseReader.verified
+        # BR: No YOLO support for background
+        self.canvas.background = False
 
     def togglePaintLabelsOption(self):
         for shape in self.canvas.shapes:

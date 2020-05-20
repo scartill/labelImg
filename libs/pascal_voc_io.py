@@ -22,6 +22,7 @@ class PascalVocWriter:
         self.boxlist = []
         self.localImgPath = localImgPath
         self.verified = False
+        self.background = False
 
     def prettify(self, elem):
         """
@@ -47,6 +48,9 @@ class PascalVocWriter:
         top = Element('annotation')
         if self.verified:
             top.set('verified', 'yes')
+
+        if self.background:
+            top.set('background', 'yes')
 
         folder = SubElement(top, 'folder')
         folder.text = self.foldername
@@ -132,6 +136,7 @@ class PascalVocReader:
         self.shapes = []
         self.filepath = filepath
         self.verified = False
+        self.background = False
         try:
             self.parseXML()
         except:
@@ -159,6 +164,13 @@ class PascalVocReader:
                 self.verified = True
         except KeyError:
             self.verified = False
+
+        try:
+            background = xmltree.attrib['background']
+            if background == 'yes':
+                self.background = True
+        except KeyError:
+            self.background = False
 
         for object_iter in xmltree.findall('object'):
             bndbox = object_iter.find("bndbox")

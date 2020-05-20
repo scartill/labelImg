@@ -1,6 +1,8 @@
 LabelImg
 ========
 
+** This as a fork of original labelImg tool with minor customization. All credits go to Tzu Ta Lin**
+
 .. image:: https://img.shields.io/pypi/v/labelimg.svg
         :target: https://pypi.python.org/pypi/labelimg
 
@@ -240,6 +242,9 @@ Hotkeys
 +------------+--------------------------------------------+
 | ↑→↓←       | Keyboard arrows to move selected rect box  |
 +------------+--------------------------------------------+
+| b          | Mark image is "model" (pure) background    |
++------------+--------------------------------------------+
+
 
 **Verify Image:**
 
@@ -250,6 +255,9 @@ This is used when creating a dataset automatically, the user can then through al
 
 The difficult field is set to 1 indicates that the object has been annotated as "difficult", for example, an object which is clearly visible but difficult to recognize without substantial use of context.
 According to your deep neural network implementation, you can include or exclude difficult objects during training.
+
+** background image: **
+Useful for marking images as pure of reference backgrounds, when using blend-in objects in specialized training scenarios. This differentiates these images without target objects which are marker as 'verified'.
 
 How to reset the settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~

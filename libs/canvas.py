@@ -62,6 +62,7 @@ class Canvas(QWidget):
         self.setFocusPolicy(Qt.WheelFocus)
         self.verified = False
         self.drawSquare = False
+        self.background = False
 
     def setDrawingColor(self, qColor):
         self.drawingLineColor = qColor
@@ -486,14 +487,17 @@ class Canvas(QWidget):
             p.drawLine(0, self.prevPoint.y(), self.pixmap.width(), self.prevPoint.y())
 
         self.setAutoFillBackground(True)
-        if self.verified:
-            pal = self.palette()
-            pal.setColor(self.backgroundRole(), QColor(184, 239, 38, 128))
-            self.setPalette(pal)
-        else:
-            pal = self.palette()
-            pal.setColor(self.backgroundRole(), QColor(232, 232, 232, 255))
-            self.setPalette(pal)
+        framecolor = QColor(232, 50, 50, 255)
+        if self.verified and not self.background:
+            framecolor = QColor(184, 239, 38, 128)
+        elif not self.verified and self.background:
+            framecolor = QColor(239, 38, 180, 255)
+        elif self.verified and self.background:
+            framecolor = QColor(80, 180, 180, 255)
+
+        pal = self.palette()
+        pal.setColor(self.backgroundRole(), framecolor)
+        self.setPalette(pal)
 
         p.end()
 

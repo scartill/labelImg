@@ -28,6 +28,7 @@ class LabelFile(object):
         self.imagePath = None
         self.imageData = None
         self.verified = False
+        self.background = False
 
     def savePascalVocFormat(self, filename, shapes, imagePath, imageData,
                             lineColor=None, fillColor=None, databaseSrc=None):
@@ -44,6 +45,7 @@ class LabelFile(object):
         writer = PascalVocWriter(imgFolderName, imgFileName,
                                  imageShape, localImgPath=imagePath)
         writer.verified = self.verified
+        writer.background = self.background
 
         for shape in shapes:
             points = shape['points']
@@ -85,6 +87,9 @@ class LabelFile(object):
 
     def toggleVerify(self):
         self.verified = not self.verified
+
+    def toggleBackground(self):
+        self.background = not self.background
 
     ''' ttf is disable
     def load(self, filename):
